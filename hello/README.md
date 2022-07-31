@@ -7,6 +7,7 @@ npm install --save-dev ts-node
 ```
 
 # 2. Debug by using ts-node
+[如何在VS Code中使用ts-node调试TypeScript](https://www.jianshu.com/p/0328553d51ec)
 ```json
 // launch.json
 "configurations": [
@@ -22,7 +23,7 @@ npm install --save-dev ts-node
             "protocol": "inspector"
         }
 ```
-or
+or [VSCode使用ts-node 调试TypeScript代码](http://t.zoukankan.com/wjlbk-p-12633316.html)
 ```json
 // tsconfig.json
 {
