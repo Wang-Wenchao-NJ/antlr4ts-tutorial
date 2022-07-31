@@ -22,7 +22,44 @@ npm install --save-dev ts-node
             "protocol": "inspector"
         }
 ```
-
+or
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+  ...
+  },
+  "include": [
+    "src/**/*",
+    "index.ts"
+  ]
+}
+```
+```json
+//launch.json
+"configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "args": [
+                "${workspaceRoot}/index.ts" // program entry
+            ],
+            "runtimeArgs": [
+                "--nolazy",
+                "-r",
+                "ts-node/register"
+            ],
+            "sourceMaps": true,
+            "cwd": "${workspaceRoot}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        }
+    ]
+```
 # 3. Run by using ts-node
 
 ```json
