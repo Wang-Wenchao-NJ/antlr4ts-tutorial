@@ -1,0 +1,14 @@
+T__0=1
+T__1=2
+T__2=3
+T__3=4
+ID=5
+WS=6
+NEWLINE=7
+COMMENT=8
+LINE_COMMENT=9
+NATURAL_NUM=10
+'transaction'=1
+'{'=2
+'}'=3
+'procedure'=4
