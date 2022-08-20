@@ -1,0 +1,79 @@
+
+transaction SmfCreateSessionTransaction {
+    call AuthenticationProcedure
+    call ResourceAllocationProcedure
+}
+
+procedure AuthenticationProcedure{
+    receive EVENT_AMF_TO_SMF_CRTSMCTX_REQ ActlCrtSmCtxReqHandle
+
+    call UdmAuthProcedure
+
+    send EVENT_SMF_TO_AMF_CRTSMCTX_RSP ActlSendCrtSmCtxRsp
+}
+
+procedure UdmAuthProcedure{
+    call UdmSDMGetProcedure
+    ignore call UdmSDMSubscribeProcedure
+}
+
+procedure UdmSDMGetProcedure {
+    do {
+        send    EVENT_SMF_TO_UDM_SDM_GET_REQ   ActlSendUdmSDMGetReq
+        receive EVENT_UDM_TO_SMF_SDM_GET_RSP   ActlRecvUdmSDMGetRsp
+        after   wait_udm_rsp_max_duration_ms   ActlWaitUdmSDMGetRspTimeout
+    } while (isNeedResendMsg)
+}
+
+procedure UdmSDMSubscribeProcedure{
+    send    EVENT_SMF_TO_UDM_SDM_SUB_REQ   ActlSendUdmSDMSubReq
+    receive EVENT_UDM_TO_SMF_SDM_SUB_RSP   ActlRecvUdmSDMSubRsp
+    after   wait_udm_rsp_max_duration_ms   ActlWaitUdmSDMSubRspTimeout
+}
+
+procedure ResourceAllocationProcedure {
+    call PccCrtSessProcedure
+
+    call UpfSelectProcedure
+
+    call IpAddrAllocProcedure
+
+    call PccUpdSessProcedure
+
+    call AccCrtChargeProcedure
+
+    call UpfSessEstProcedure
+
+    call AmfN1N2MsgTransferProcedure
+
+    call UpfSessModProcedure
+
+    call UdmUECMRegProcedure
+}
+
+procedure PccCrtSessProcedure{
+}
+
+procedure UpfSelectProcedure{
+}
+
+procedure IpAddrAllocProcedure{
+}
+
+procedure PccUpdSessProcedure{
+}
+
+procedure AccCrtChargeProcedure{
+}
+
+procedure UpfSessEstProcedure{
+}
+
+procedure AmfN1N2MsgTransferProcedure{
+}
+
+procedure UpfSessModProcedure{
+}
+
+procedure UdmUECMRegProcedure{
+}
