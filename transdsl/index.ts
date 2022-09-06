@@ -1,8 +1,8 @@
+import * as fs from "fs";
 
-import { ANTLRInputStream, CharStreams, CommonTokenStream } from "antlr4ts";
+import { CharStreams, CommonTokenStream } from "antlr4ts";
 import { TransactionDslLexer } from "./src/parser/TransactionDslLexer";
 import { TransactionDslParser } from "./src/parser/TransactionDslParser";
-import * as fs from "fs";
 import { DetailListener } from "./src/backend/DetailListener";
 import { ParseTreeWalker, TerminalNode, ParseTree } from "antlr4ts/tree";
 

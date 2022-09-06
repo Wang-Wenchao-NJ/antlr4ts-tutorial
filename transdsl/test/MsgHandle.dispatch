@@ -1,0 +1,102 @@
+app:ActlApp
+context:Actl
+transaction types: SAE, PGW, USER, SESSION, SMF, CREATE, MODIFY, DELETE, NETDELETE, HANDOVER
+
+conflict polices {
+    msg buffer polices{
+        SmfReleaseSessionTransaction {
+            SmfUpdateSessionTransaction  grab
+            type(SMF, SESSION, MODIFY)   grab
+        }
+
+        SmfReleaseSessionTransaction SmfCreateSessionTransaction not_pop
+        SmfReleaseSessionTransaction type(SESSION, MODIFY)       not_pop
+        type(SESSION, MODIFY)        type(SESSION, MODIFY)       discard
+        type(SESSION, MODIFY)        SmfCreateSessionTransaction grab
+        type(PCCBEARCRT) type(PCCBEARCRT) merge
+    }
+
+    buffered msg pop polices {
+        SmfReleaseSessionTransaction SmfCreateSessionTransaction not_pop
+        SmfReleaseSessionTransaction type(SESSION, MODIFY)       not_pop
+
+        SmfReleaseSessionTransaction SmfCreateSessionTransaction not_pop
+        SmfReleaseSessionTransaction type(SESSION, MODIFY)       not_pop
+        type(SESSION, MODIFY)        type(SESSION, MODIFY)       discard
+        type(SESSION, MODIFY)        SmfCreateSessionTransaction grab
+    }
+
+    SmfReleaseSessionTransaction{
+        SmfUpdateSessionTransaction replace
+        any                         grab
+    }
+
+    SmfUpdateSessionTransaction{
+        SmfCreateSessionTransaction discard
+        any                         discard
+    }
+
+    SmfUpdateSessionTransaction{
+        any                         discard
+    }
+
+    type(SESSION, MODIFY) {
+        SmfCreateSessionTransaction discard
+        isSessionInIdleState        grab
+        type(SESSION, DELETE)       discard
+        any                         dsicard
+    }
+
+    SmfReleaseSessionTransaction SmfCreateSessionTransaction not_pop
+    SmfReleaseSessionTransaction type(SESSION, MODIFY)       not_pop
+    type(SESSION, MODIFY)        type(SESSION, MODIFY)       discard
+    type(SESSION, MODIFY)        SmfCreateSessionTransaction grab
+}
+
+
+/*
+111111111111111111
+*/
+
+transaction register {
+    /*  */
+    1  SmfCreateSessionTransaction // 22222
+    2  SmfUpdateSessionTransaction /* 111 */
+ //3  SmfReleaseSessionTransaction /* 444 */
+    4  UpfTriggerServiceRequestTransaction /* 333 */ ///
+
+    1  SmfCreateSessionTransaction // 22222
+    // 2  SmfUpdateSessionTransaction /* 111 */
+    3  SmfReleaseSessionTransaction /* 444 */
+    4  UpfTriggerServiceRequestTransaction /* 333 */ ///
+}
+
+trigger events {
+    EVENT_AMF_TO_SMF_CRTSMCTX_REQ ActlPreProcCrtSmCtxReq{
+        DISPATCH_TYPE_SMF_CRT_SESS SmfCreateSessionTransaction type(SMF, SESSION, CREATE) ActlGetConflictTransCtx
+    }
+
+    EVENT_AMF_TO_SMF_UPDSMCTX_REQ ActlPreProcUpdSmCtxReq{
+        DISPATCH_TYPE_SMF_UPD_SESS SmfUpdateSessionTransaction type(SMF, SESSION, MODIFY) ActlGetConflictTransCtx
+    }
+
+    EVENT_AMF_TO_SMF_RELSMCTX_REQ ActlPreProcRelSmCtxReq{ /* Pgw Dmm  */
+        DISPATCH_TYPE_SMF_REL_SESS SmfReleaseSessionTransaction type(SMF, SESSION, DELETE) ActlGetConflictTransCtx
+    }
+    /* to self */
+    EVENT_UPF_TO_SMF_SESS_RPT_REQ ActlPreProcUpfSessRpt{
+        DISPATCH_TYPE_DDN_PAGING UpfTriggerServiceRequestTransaction
+    }
+
+    EVENT_UPF_TO_SMF_SESS_RPT_REQ UpfTriggerServiceRequestTransaction
+    EVENT_UPF_TO_SMF_SESS_RPT_REQ UpfTriggerServiceRequestTransaction type(SMF, SESSION, DELETE)
+
+    EVENT_UPF_TO_SMF_SESS_RPT_REQ UpfTriggerServiceRequestTransaction type(SMF, SESSION, DELETE) ActlGetConflictTransCtx
+}
+
+
+interrupt events {
+    EVENT_SMF_TO_UPF_SESS_EST_RSP  ActlGetN4RspMsgTransCtx
+    EVENT_SMF_TO_UPF_SESS_MOD_RSP  ActlGetN4RspMsgTransCtx
+    EVENT_SMF_TO_UPF_SESS_DEL_RSP  ActlGetN4RspMsgTransCtx
+}
